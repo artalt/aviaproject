@@ -1,0 +1,44 @@
+openapi: 3.0.3
+info:
+  title: Homework
+  description: Homework
+  version: 1.0.0
+servers:
+  - url: 'https'
+paths:
+  /v1/user:
+    get:
+      tags:
+        - access
+      operationId: getAuthUser
+      summary: Информация об аутентифицированном пользователе.
+      description: Информация об аутентифицированном пользователе.
+      responses:
+        '200':
+          description: Успешный ответ.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+components:
+  schemas:
+    UserProfile:
+      type: object
+      required:
+        - id
+        - login
+        - avatarUrl
+      properties:
+        id:
+          type: string
+          description: Идентификатор пользователя
+          format: uuid
+        login:
+          type: string
+          description: Логин пользователя в системе.
+          example: aaryaz10
+        avatarUrl:
+          type: string
+          description: URL по которому можно получить аватар пользователя.
+          example: https://i.pravatar.cc/150
