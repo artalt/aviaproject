@@ -7,8 +7,78 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/deepmap/oapi-codegen/pkg/runtime"
 	"github.com/go-chi/chi/v5"
 )
+
+// CreateOrderRequest defines model for CreateOrderRequest.
+type CreateOrderRequest struct {
+	// Имя пассажира
+	FirstName string `json:"firstName"`
+
+	// Идентификатор рейса
+	FlightId string `json:"flightId"`
+
+	// Фамилия пассажира
+	LastName string `json:"lastName"`
+}
+
+// Flight defines model for Flight.
+type Flight struct {
+	// Embedded struct due to allOf(#/components/schemas/FlightItem)
+	FlightItem `yaml:",inline"`
+	// Embedded fields due to inline allOf schema
+	// Можно ли вернуть
+	CanReturn bool `json:"canReturn"`
+}
+
+// FlightItem defines model for FlightItem.
+type FlightItem struct {
+	// Дата и время прилета
+	ArrivalDateTime string `json:"arrivalDateTime"`
+
+	// Дата и время вылета
+	DepartureDateTime string `json:"departureDateTime"`
+
+	// Откуда
+	From string `json:"from"`
+
+	// Есть ли багаж
+	HasLuggage bool `json:"hasLuggage"`
+
+	// Идентификатор рейса
+	Id string `json:"id"`
+
+	// Номер рейса
+	Number string `json:"number"`
+
+	// Количество свободных билетов
+	TicketsCount int `json:"ticketsCount"`
+
+	// Куда
+	To string `json:"to"`
+
+	// Тип билета business|economy
+	Type string `json:"type"`
+}
+
+// Order defines model for Order.
+type Order struct {
+	// Идентификатор заказа
+	Id string `json:"id"`
+
+	// Ссылка на оплату
+	PaymentLink string `json:"paymentLink"`
+
+	// Статус заказа booked|paid|canceled
+	Status string `json:"status"`
+}
+
+// RegistrationRequest defines model for RegistrationRequest.
+type RegistrationRequest struct {
+	// Идентификатор билета
+	TicketId string `json:"ticketId"`
+}
 
 // UserProfile defines model for UserProfile.
 type UserProfile struct {
@@ -22,8 +92,53 @@ type UserProfile struct {
 	Login string `json:"login"`
 }
 
+// GetFlightListParams defines parameters for GetFlightList.
+type GetFlightListParams struct {
+	// Откуда
+	From *string `json:"from,omitempty"`
+
+	// Куда
+	To *string `json:"to,omitempty"`
+
+	// Дата вылета от. Пример: 30-12-2022
+	DateStart *string `json:"dateStart,omitempty"`
+
+	// Дата вылета от. Пример: 31-12-2022
+	DateEnd *string `json:"dateEnd,omitempty"`
+
+	// Тип билета business|economy
+	Type *string `json:"type,omitempty"`
+
+	// С багажом 1 - да, 0 - нет
+	HasLuggage *string `json:"hasLuggage,omitempty"`
+}
+
+// OrderTicketJSONBody defines parameters for OrderTicket.
+type OrderTicketJSONBody CreateOrderRequest
+
+// RegistrationJSONBody defines parameters for Registration.
+type RegistrationJSONBody RegistrationRequest
+
+// OrderTicketJSONRequestBody defines body for OrderTicket for application/json ContentType.
+type OrderTicketJSONRequestBody OrderTicketJSONBody
+
+// RegistrationJSONRequestBody defines body for Registration for application/json ContentType.
+type RegistrationJSONRequestBody RegistrationJSONBody
+
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// Получение списка рейсов
+	// (GET /v1/flight)
+	GetFlightList(w http.ResponseWriter, r *http.Request, params GetFlightListParams)
+	// Получение информации по рейсу
+	// (GET /v1/flight/{id})
+	GetFlightById(w http.ResponseWriter, r *http.Request, id string)
+	// Заказ билета на рейс
+	// (POST /v1/order)
+	OrderTicket(w http.ResponseWriter, r *http.Request)
+	// Регистрация на рейс
+	// (POST /v1/registration)
+	Registration(w http.ResponseWriter, r *http.Request)
 	// Информация об аутентифицированном пользователе.
 	// (GET /v1/user)
 	GetAuthUser(w http.ResponseWriter, r *http.Request)
@@ -37,6 +152,148 @@ type ServerInterfaceWrapper struct {
 }
 
 type MiddlewareFunc func(http.HandlerFunc) http.HandlerFunc
+
+// GetFlightList operation middleware
+func (siw *ServerInterfaceWrapper) GetFlightList(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetFlightListParams
+
+	// ------------- Optional query parameter "from" -------------
+	if paramValue := r.URL.Query().Get("from"); paramValue != "" {
+
+	}
+
+	err = runtime.BindQueryParameter("form", true, false, "from", r.URL.Query(), &params.From)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "from", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "to" -------------
+	if paramValue := r.URL.Query().Get("to"); paramValue != "" {
+
+	}
+
+	err = runtime.BindQueryParameter("form", true, false, "to", r.URL.Query(), &params.To)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "to", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "dateStart" -------------
+	if paramValue := r.URL.Query().Get("dateStart"); paramValue != "" {
+
+	}
+
+	err = runtime.BindQueryParameter("form", true, false, "dateStart", r.URL.Query(), &params.DateStart)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "dateStart", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "dateEnd" -------------
+	if paramValue := r.URL.Query().Get("dateEnd"); paramValue != "" {
+
+	}
+
+	err = runtime.BindQueryParameter("form", true, false, "dateEnd", r.URL.Query(), &params.DateEnd)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "dateEnd", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "type" -------------
+	if paramValue := r.URL.Query().Get("type"); paramValue != "" {
+
+	}
+
+	err = runtime.BindQueryParameter("form", true, false, "type", r.URL.Query(), &params.Type)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "type", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "hasLuggage" -------------
+	if paramValue := r.URL.Query().Get("hasLuggage"); paramValue != "" {
+
+	}
+
+	err = runtime.BindQueryParameter("form", true, false, "hasLuggage", r.URL.Query(), &params.HasLuggage)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "hasLuggage", Err: err})
+		return
+	}
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetFlightList(w, r, params)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// GetFlightById operation middleware
+func (siw *ServerInterfaceWrapper) GetFlightById(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id string
+
+	err = runtime.BindStyledParameter("simple", false, "id", chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetFlightById(w, r, id)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// OrderTicket operation middleware
+func (siw *ServerInterfaceWrapper) OrderTicket(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.OrderTicket(w, r)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// Registration operation middleware
+func (siw *ServerInterfaceWrapper) Registration(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.Registration(w, r)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
 
 // GetAuthUser operation middleware
 func (siw *ServerInterfaceWrapper) GetAuthUser(w http.ResponseWriter, r *http.Request) {
@@ -166,6 +423,18 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		ErrorHandlerFunc:   options.ErrorHandlerFunc,
 	}
 
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/v1/flight", wrapper.GetFlightList)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/v1/flight/{id}", wrapper.GetFlightById)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/v1/order", wrapper.OrderTicket)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/v1/registration", wrapper.Registration)
+	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/v1/user", wrapper.GetAuthUser)
 	})
