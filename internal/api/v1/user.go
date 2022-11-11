@@ -21,5 +21,8 @@ func (a apiServer) GetAuthUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write(response)
+	_, err = w.Write(response)
+	if err != nil {
+		return
+	}
 }
