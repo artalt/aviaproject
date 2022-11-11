@@ -14,7 +14,7 @@ build:
 	go build -o ${BINARY_NAME} ./cmd/app/main.go
 
 gen-api:
-	cd ./specs; go generate
+	go generate ./...
 
 lint:
 	golangci-lint run
