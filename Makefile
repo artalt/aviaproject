@@ -29,3 +29,12 @@ run:
 clean:
 	go clean
 	rm ${BINARY_NAME}
+
+migrate-up:
+	migrate -source file://migrations/postgresql -database "postgres://root:pass@localhost:5433/digdb?sslmode=disable" up
+
+migrate-down:
+	migrate -source file://migrations/postgresql -database "postgres://root:pass@localhost:5433/digdb?sslmode=disable" down
+
+migrate-down-last:
+	migrate -source file://migrations/postgresql -database "postgres://root:pass@localhost:5433/digdb?sslmode=disable" down 1

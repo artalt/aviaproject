@@ -11,9 +11,14 @@ import (
 
 var cfg Config
 
+type DbConfig struct {
+	Postgresql string `yaml:"postgresql"`
+}
+
 type Config struct {
-	BasePath string `yaml:"base_path"`
-	Addr     string `yaml:"addr"`
+	BasePath string   `yaml:"base_path"`
+	Addr     string   `yaml:"addr"`
+	Db       DbConfig `yaml:"db"`
 }
 
 func InitConfig(args []string) (*Config, error) {
