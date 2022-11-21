@@ -25,23 +25,20 @@ type CreateOrderRequest struct {
 
 // Flight defines model for Flight.
 type Flight struct {
-	// Embedded struct due to allOf(#/components/schemas/FlightItem)
-	FlightItem `yaml:",inline"`
-	// Embedded fields due to inline allOf schema
-	// Можно ли вернуть
-	CanReturn bool `json:"canReturn"`
-}
+	// Куда
+	Arrival string `json:"arrival"`
 
-// FlightItem defines model for FlightItem.
-type FlightItem struct {
 	// Дата и время прилета
 	ArrivalDateTime string `json:"arrivalDateTime"`
 
-	// Дата и время вылета
-	DepartureDateTime string `json:"departureDateTime"`
+	// Можно ли вернуть
+	CanReturn bool `json:"canReturn"`
 
 	// Откуда
-	From string `json:"from"`
+	Departure string `json:"departure"`
+
+	// Дата и время вылета
+	DepartureDateTime string `json:"departureDateTime"`
 
 	// Есть ли багаж
 	HasLuggage bool `json:"hasLuggage"`
@@ -55,11 +52,8 @@ type FlightItem struct {
 	// Количество свободных билетов
 	TicketsCount int `json:"ticketsCount"`
 
-	// Куда
-	To string `json:"to"`
-
-	// Тип билета business|economy
-	Type string `json:"type"`
+	// Типы билетов
+	Types string `json:"types"`
 }
 
 // Order defines model for Order.
@@ -95,10 +89,10 @@ type UserProfile struct {
 // GetFlightListParams defines parameters for GetFlightList.
 type GetFlightListParams struct {
 	// Откуда
-	From *string `json:"from,omitempty"`
+	Departure *string `json:"departure,omitempty"`
 
 	// Куда
-	To *string `json:"to,omitempty"`
+	Arrival *string `json:"arrival,omitempty"`
 
 	// Дата вылета от. Пример: 30-12-2022
 	DateStart *string `json:"dateStart,omitempty"`
@@ -162,25 +156,25 @@ func (siw *ServerInterfaceWrapper) GetFlightList(w http.ResponseWriter, r *http.
 	// Parameter object where we will unmarshal all parameters from the context
 	var params GetFlightListParams
 
-	// ------------- Optional query parameter "from" -------------
-	if paramValue := r.URL.Query().Get("from"); paramValue != "" {
+	// ------------- Optional query parameter "departure" -------------
+	if paramValue := r.URL.Query().Get("departure"); paramValue != "" {
 
 	}
 
-	err = runtime.BindQueryParameter("form", true, false, "from", r.URL.Query(), &params.From)
+	err = runtime.BindQueryParameter("form", true, false, "departure", r.URL.Query(), &params.Departure)
 	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "from", Err: err})
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "departure", Err: err})
 		return
 	}
 
-	// ------------- Optional query parameter "to" -------------
-	if paramValue := r.URL.Query().Get("to"); paramValue != "" {
+	// ------------- Optional query parameter "arrival" -------------
+	if paramValue := r.URL.Query().Get("arrival"); paramValue != "" {
 
 	}
 
-	err = runtime.BindQueryParameter("form", true, false, "to", r.URL.Query(), &params.To)
+	err = runtime.BindQueryParameter("form", true, false, "arrival", r.URL.Query(), &params.Arrival)
 	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "to", Err: err})
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "arrival", Err: err})
 		return
 	}
 

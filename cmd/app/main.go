@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"log"
 	"net/http"
 	"os"
@@ -13,6 +14,8 @@ import (
 
 	v1 "homework/internal/api/v1"
 	"homework/internal/config"
+	fservice "homework/internal/service/flight"
+	fstorage "homework/internal/storage/postgresql/flight"
 	"homework/specs"
 )
 
@@ -35,7 +38,18 @@ func main() {
 		return
 	}
 
-	apiServer := v1.NewAPIServer()
+	// инициализация пакета/драйвера БД
+	db, err := pgxpool.Connect(context.Background(), cfg.Db.Postgresql)
+	if err != nil {
+		log.Fatalf("Unable to connect to database: %v\n", err)
+	}
+	defer db.Close()
+	// инициализация хранилищ
+	flightStorage := fstorage.NewFlightStorage(db)
+	// инициализация сервисов
+	flightService := fservice.NewFlightService(flightStorage)
+
+	apiServer := v1.NewAPIServer(flightService)
 
 	err = startHTTPServer(ctx, cfg, apiServer)
 	if err != nil {

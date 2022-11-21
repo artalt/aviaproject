@@ -1,24 +1,17 @@
 package v1
 
 import (
-	"homework/specs"
 	"net/http"
+
+	"homework/internal/service/flight"
+	"homework/specs"
 )
 
 // Быстрая проверка актуальности текущего интерфейса сервера.
 var _ specs.ServerInterface = &apiServer{}
 
 type apiServer struct {
-}
-
-func (a apiServer) GetFlightList(w http.ResponseWriter, r *http.Request, params specs.GetFlightListParams) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (a apiServer) GetFlightById(w http.ResponseWriter, r *http.Request, id string) {
-	//TODO implement me
-	panic("implement me")
+	flightService flight.FlightService
 }
 
 func (a apiServer) OrderTicket(w http.ResponseWriter, r *http.Request) {
@@ -31,6 +24,8 @@ func (a apiServer) Registration(w http.ResponseWriter, r *http.Request) {
 	panic("implement me")
 }
 
-func NewAPIServer() specs.ServerInterface {
-	return &apiServer{}
+func NewAPIServer(flightService flight.FlightService) specs.ServerInterface {
+	return &apiServer{
+		flightService: flightService,
+	}
 }
