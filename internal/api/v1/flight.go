@@ -8,16 +8,17 @@ import (
 
 	"github.com/google/uuid"
 
-	flightDomain "homework/internal/domain/flight"
+	flightDomainPkg "homework/internal/domain/flight"
 	"homework/specs"
 )
 
 func (a apiServer) GetFlightList(w http.ResponseWriter, r *http.Request, params specs.GetFlightListParams) {
+	w.Header().Add("Content-Type", "application/json")
 	var dateStartParam *time.Time
 	if nil != params.DateStart {
 		t1, err := time.Parse("02-01-2006", *params.DateStart)
 		if err != nil {
-			w.WriteHeader(400)
+			a.writeErrorResponse(w, 400, "Invalid param dateStart")
 			return
 		}
 		dateStartParam = &t1
@@ -26,12 +27,12 @@ func (a apiServer) GetFlightList(w http.ResponseWriter, r *http.Request, params 
 	if nil != params.DateEnd {
 		t2, err := time.Parse("02-01-2006", *params.DateEnd)
 		if err != nil {
-			w.WriteHeader(400)
+			a.writeErrorResponse(w, 400, "Invalid param dateEnd")
 			return
 		}
 		dateEndParam = &t2
 	}
-	filter := &flightDomain.FilterDto{
+	filter := &flightDomainPkg.FilterDto{
 		Departure: params.Departure,
 		Arrival:   params.Arrival,
 		DateStart: dateStartParam,
@@ -43,13 +44,13 @@ func (a apiServer) GetFlightList(w http.ResponseWriter, r *http.Request, params 
 		filter.HasLuggage = &hasLuggageFlag
 	}
 	if !filter.IsValid() {
-		w.WriteHeader(400)
+		a.writeErrorResponse(w, 400, "Invalid params")
 		return
 	}
 	ctx := context.Background()
 	list, err := a.flightService.GetFlightList(ctx, filter)
 	if err != nil {
-		w.WriteHeader(500)
+		a.writeErrorResponse(w, 500, err.Error())
 		return
 	}
 	var results []*specs.Flight
@@ -72,27 +73,27 @@ func (a apiServer) GetFlightList(w http.ResponseWriter, r *http.Request, params 
 
 	response, err := json.Marshal(results)
 	if err != nil {
-		w.WriteHeader(500)
+		a.writeErrorResponse(w, 500, "Error create json response")
 		return
 	}
 
-	w.Header().Add("Content-Type", "application/json")
 	_, err = w.Write(response)
 	if err != nil {
-		panic("can't write response")
+		a.writeErrorResponse(w, 500, "Can't write response")
 	}
 }
 
 func (a apiServer) GetFlightById(w http.ResponseWriter, r *http.Request, id string) {
+	w.Header().Add("Content-Type", "application/json")
 	flightId, err := uuid.Parse(id)
 	if err != nil {
-		w.WriteHeader(400)
+		a.writeErrorResponse(w, 400, "Invalid path param id")
 		return
 	}
 	ctx := context.Background()
 	flight, err := a.flightService.GetFlightById(ctx, flightId)
 	if err != nil {
-		w.WriteHeader(500)
+		a.writeErrorResponse(w, 500, err.Error())
 		return
 	}
 	flightData := &specs.Flight{
@@ -110,13 +111,12 @@ func (a apiServer) GetFlightById(w http.ResponseWriter, r *http.Request, id stri
 
 	response, err := json.Marshal(flightData)
 	if err != nil {
-		w.WriteHeader(500)
+		a.writeErrorResponse(w, 500, "Error create json response")
 		return
 	}
 
-	w.Header().Add("Content-Type", "application/json")
 	_, err = w.Write(response)
 	if err != nil {
-		panic("can't write response")
+		a.writeErrorResponse(w, 500, "Can't write response")
 	}
 }

@@ -5,27 +5,27 @@ import (
 
 	"github.com/google/uuid"
 
-	flightDomain "homework/internal/domain/flight"
-	flightStorage "homework/internal/storage/postgresql/flight"
+	flightDomainPkg "homework/internal/domain/flight"
+	flightStoragePkg "homework/internal/storage/postgresql/flight"
 )
 
 type FlightService interface {
-	GetFlightById(ctx context.Context, flightId uuid.UUID) (flightDomain.Flight, error)
-	GetFlightList(ctx context.Context, filter flightDomain.Filter) ([]flightDomain.Flight, error)
+	GetFlightById(ctx context.Context, flightId uuid.UUID) (flightDomainPkg.Flight, error)
+	GetFlightList(ctx context.Context, filter flightDomainPkg.Filter) ([]flightDomainPkg.Flight, error)
 }
 
 type service struct {
-	flightStorage flightStorage.FlightStorage
+	flightStorage flightStoragePkg.FlightStorage
 }
 
-func (s *service) GetFlightList(ctx context.Context, filter flightDomain.Filter) ([]flightDomain.Flight, error) {
+func (s *service) GetFlightList(ctx context.Context, filter flightDomainPkg.Filter) ([]flightDomainPkg.Flight, error) {
 	return s.flightStorage.GetFlightList(ctx, filter)
 }
-func (s *service) GetFlightById(ctx context.Context, flightId uuid.UUID) (flightDomain.Flight, error) {
+func (s *service) GetFlightById(ctx context.Context, flightId uuid.UUID) (flightDomainPkg.Flight, error) {
 	return s.flightStorage.GetFlightById(ctx, flightId)
 }
 
-func NewFlightService(flightStorage flightStorage.FlightStorage) FlightService {
+func NewFlightService(flightStorage flightStoragePkg.FlightStorage) FlightService {
 	return &service{
 		flightStorage: flightStorage,
 	}

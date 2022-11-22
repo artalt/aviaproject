@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"fmt"
 	"net/http"
 
 	"homework/internal/service/flight"
@@ -27,5 +28,13 @@ func (a apiServer) Registration(w http.ResponseWriter, r *http.Request) {
 func NewAPIServer(flightService flight.FlightService) specs.ServerInterface {
 	return &apiServer{
 		flightService: flightService,
+	}
+}
+
+func (a apiServer) writeErrorResponse(w http.ResponseWriter, statusCode int, msg string) {
+	w.WriteHeader(statusCode)
+	_, err := w.Write([]byte(fmt.Sprintf(`{"error": "%s"}`, msg)))
+	if err != nil {
+		w.WriteHeader(500)
 	}
 }
