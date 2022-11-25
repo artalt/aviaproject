@@ -29,12 +29,12 @@ paths:
       description: Получение списка прямых рейсов по дате вылета и дате прилета, типу билета, наличию багажа
       parameters:
         - in: query
-          name: from
+          name: departure
           schema:
             type: string
           description: 'Откуда'
         - in: query
-          name: to
+          name: arrival
           schema:
             type: string
           description: 'Куда'
@@ -66,7 +66,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/FlightItem'
+                  $ref: '#/components/schemas/Flight'
   /v1/flight/{id}:
     get:
       tags:
@@ -131,18 +131,19 @@ paths:
           description: Регистрация не доступна
 components:
   schemas:
-    FlightItem:
+    Flight:
       type: object
       required:
         - id
         - number
-        - from
-        - to
+        - departure
+        - arrival
         - departureDateTime
         - arrivalDateTime
-        - type
+        - types
         - hasLuggage
         - ticketsCount
+        - canReturn
       properties:
         id:
           type: string
@@ -152,11 +153,11 @@ components:
           type: string
           description: Номер рейса
           example: T104
-        from:
+        departure:
           type: string
           description: Откуда
           example: Внуково
-        to:
+        arrival:
           type: string
           description: Куда
           example: Домодедово
@@ -168,10 +169,10 @@ components:
           type: string
           description: Дата и время прилета
           example: '12:01 11-11-2022'
-        type:
+        types:
           type: string
-          description: Тип билета business|economy
-          example: business
+          description: Типы билетов
+          example: business,economy
         hasLuggage:
           type: boolean
           description: Есть ли багаж
@@ -180,17 +181,10 @@ components:
           type: integer
           description: Количество свободных билетов
           example: 3
-    Flight:
-      allOf:
-        - $ref: '#/components/schemas/FlightItem'
-        - type: object
-          required:
-            - canReturn
-          properties:
-            canReturn:
-              type: boolean
-              description: Можно ли вернуть
-              example: true
+        canReturn:
+          type: boolean
+          description: Можно ли вернуть
+          example: true
     CreateOrderRequest:
       type: object
       required:

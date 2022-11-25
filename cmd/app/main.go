@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"log"
 	"net/http"
 	"os"
@@ -11,8 +12,10 @@ import (
 	"github.com/go-chi/chi"
 	"golang.org/x/sync/errgroup"
 
-	v1 "homework/internal/api/v1"
+	v1Pkg "homework/internal/api/v1"
 	"homework/internal/config"
+	fServicePkg "homework/internal/service/flight"
+	fStoragePkg "homework/internal/storage/postgresql/flight"
 	"homework/specs"
 )
 
@@ -35,7 +38,18 @@ func main() {
 		return
 	}
 
-	apiServer := v1.NewAPIServer()
+	// инициализация пакета/драйвера БД
+	db, err := pgxpool.Connect(ctx, cfg.Db.Postgresql)
+	if err != nil {
+		log.Fatalf("Unable to connect to database: %v\n", err)
+	}
+	defer db.Close()
+	// инициализация хранилищ
+	flightStorage := fStoragePkg.NewFlightStorage(db)
+	// инициализация сервисов
+	flightService := fServicePkg.NewFlightService(flightStorage)
+
+	apiServer := v1Pkg.NewAPIServer(flightService)
 
 	err = startHTTPServer(ctx, cfg, apiServer)
 	if err != nil {
