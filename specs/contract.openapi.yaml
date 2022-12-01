@@ -210,6 +210,7 @@ components:
         - id
         - paymentLink
         - status
+        - ticket
       properties:
         id:
           type: string
@@ -223,6 +224,60 @@ components:
           type: string
           description: Статус заказа booked|paid|canceled
           example: booked
+        ticket:
+          $ref: '#/components/schemas/Ticket'
+    Ticket:
+      type: object
+      required:
+        - id
+        - flightId
+        - status
+        - type
+        - seat
+        - luggage
+        - price
+        - canReturn
+      properties:
+        id:
+          type: string
+          description: Идентификатор билета
+          format: uuid
+        flightId:
+          type: string
+          description: Идентификатор рейса
+          format: uuid
+        status:
+          type: string
+          description: Статус free|taken
+          example: taken
+        type:
+          type: string
+          description: Тип билета business|economy
+          example: economy
+        passFirstName:
+          type: string
+          description: Имя пассажира
+          example: Test
+        passLastName:
+          type: string
+          description: Фамилия пассажира
+          example: Testov
+        seat:
+          type: string
+          description: Место
+          example: 11A
+        luggage:
+          type: integer
+          description: Багаж кг
+          example: 23
+        price:
+          type: integer
+          description: Цена руб
+          example: 30000
+        canReturn:
+          type: boolean
+          description: Можно ли вернуть билет
+          example: true
     RegistrationRequest:
       type: object
       required:

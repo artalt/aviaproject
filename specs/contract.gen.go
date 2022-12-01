@@ -66,12 +66,46 @@ type Order struct {
 
 	// Статус заказа booked|paid|canceled
 	Status string `json:"status"`
+	Ticket Ticket `json:"ticket"`
 }
 
 // RegistrationRequest defines model for RegistrationRequest.
 type RegistrationRequest struct {
 	// Идентификатор билета
 	TicketId string `json:"ticketId"`
+}
+
+// Ticket defines model for Ticket.
+type Ticket struct {
+	// Можно ли вернуть билет
+	CanReturn bool `json:"canReturn"`
+
+	// Идентификатор рейса
+	FlightId string `json:"flightId"`
+
+	// Идентификатор билета
+	Id string `json:"id"`
+
+	// Багаж кг
+	Luggage int `json:"luggage"`
+
+	// Имя пассажира
+	PassFirstName *string `json:"passFirstName,omitempty"`
+
+	// Фамилия пассажира
+	PassLastName *string `json:"passLastName,omitempty"`
+
+	// Цена руб
+	Price int `json:"price"`
+
+	// Место
+	Seat string `json:"seat"`
+
+	// Статус free|taken
+	Status string `json:"status"`
+
+	// Тип билета business|economy
+	Type string `json:"type"`
 }
 
 // UserProfile defines model for UserProfile.
