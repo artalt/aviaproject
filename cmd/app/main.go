@@ -15,7 +15,10 @@ import (
 	v1Pkg "homework/internal/api/v1"
 	"homework/internal/config"
 	fServicePkg "homework/internal/service/flight"
+	fOrderPkg "homework/internal/service/order"
 	fStoragePkg "homework/internal/storage/postgresql/flight"
+	oStoragePkg "homework/internal/storage/postgresql/order"
+	tStoragePkg "homework/internal/storage/postgresql/ticket"
 	"homework/specs"
 )
 
@@ -46,10 +49,13 @@ func main() {
 	defer db.Close()
 	// инициализация хранилищ
 	flightStorage := fStoragePkg.NewFlightStorage(db)
+	orderStorage := oStoragePkg.NewOrderStorage(db)
+	ticketStorage := tStoragePkg.NewTicketStorage(db)
 	// инициализация сервисов
 	flightService := fServicePkg.NewFlightService(flightStorage)
+	orderService := fOrderPkg.NewOrderService(orderStorage, ticketStorage)
 
-	apiServer := v1Pkg.NewAPIServer(flightService)
+	apiServer := v1Pkg.NewAPIServer(flightService, orderService)
 
 	err = startHTTPServer(ctx, cfg, apiServer)
 	if err != nil {

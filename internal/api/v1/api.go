@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"homework/internal/service/flight"
+	"homework/internal/service/order"
 	"homework/specs"
 )
 
@@ -13,11 +14,7 @@ var _ specs.ServerInterface = &apiServer{}
 
 type apiServer struct {
 	flightService flight.FlightService
-}
-
-func (a apiServer) OrderTicket(w http.ResponseWriter, r *http.Request) {
-	//TODO implement me
-	panic("implement me")
+	orderService  order.OrderService
 }
 
 func (a apiServer) Registration(w http.ResponseWriter, r *http.Request) {
@@ -25,9 +22,10 @@ func (a apiServer) Registration(w http.ResponseWriter, r *http.Request) {
 	panic("implement me")
 }
 
-func NewAPIServer(flightService flight.FlightService) specs.ServerInterface {
+func NewAPIServer(flightService flight.FlightService, orderService order.OrderService) specs.ServerInterface {
 	return &apiServer{
 		flightService: flightService,
+		orderService:  orderService,
 	}
 }
 
