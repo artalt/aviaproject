@@ -13,3 +13,7 @@
 Откатить одну миграцию:
 
 **migrate -source file://migrations/postgresql -database "postgres://root:pass@localhost:5433/digdb?sslmode=disable" down 1**
+
+Сгенерировать мок для тестирования
+
+**mockgen -source=source.go > ./mock/source_mock.go**
